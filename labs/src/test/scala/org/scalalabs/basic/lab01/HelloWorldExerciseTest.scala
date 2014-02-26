@@ -59,7 +59,7 @@ class HelloWorldExerciseTest extends Specification {
   * such a way that the tests in this suite all succeed.
   *
   * Hint:
-  * - A Class may have a companion Ojbect by the same name, defined
+  * - A Class may have a companion Object by the same name, defined
   *   in the same source file
   * - An Object can be constructed using an apply method
   */

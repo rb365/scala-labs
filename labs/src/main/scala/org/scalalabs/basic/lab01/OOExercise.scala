@@ -34,6 +34,32 @@ import scala.language.implicitConversions
  * - Create a new currency Dollar
  * - Provide a conversion method that converts from Euro to Dollar
  */
-class Euro {
+class Euro(var euro:Int = 0, var cents:Int = 0) extends Currency("EUR") with Ordered[Euro]{
+  val inCents = euro*100 + cents
+  def + (operand:Euro) = Euro.fromCents(inCents + operand.inCents)
+  def * (operand:Int) = Euro.fromCents(inCents * operand)
 
+  override def toString = symbol + ": " + euro + "," +
+    (if (cents == 0) "--" else if(cents < 10) "0" + cents else cents)
+
+  def compare(that: Euro): Int = this.inCents - that.inCents
 }
+
+object Euro {
+  def fromCents(value:Int) = new Euro(value/100, value%100)
+
+  implicit class extension(mult : Int) {
+    def *(euro:Euro) = Euro.fromCents(mult * euro.inCents)
+  }
+
+  implicit def dollarToEuro(dollar : Dollar) = Euro.fromCents((dollar.inCents * 142) / 150)
+}
+
+class Dollar(var dollars:Int = 0, var cents:Int = 0) extends Currency("USD") with Ordered[Dollar]{
+  val inCents = dollars*100 + cents
+
+  def compare(that: Dollar): Int = this.inCents - that.inCents
+}
+
+
+abstract class Currency(var symbol:String)
