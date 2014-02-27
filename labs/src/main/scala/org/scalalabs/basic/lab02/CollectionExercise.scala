@@ -4,6 +4,7 @@ package org.scalalabs.basic.lab02
  * higher order collection methods can be rehearsed.
  */
 import sys._
+import collection.mutable
 
 object CollectionExercise01 {
 
@@ -33,7 +34,33 @@ object CollectionExercise01 {
    *
    */
   def googleCodeJamGooglerese(lines: String*): Seq[String] = {
-    error("fix me")
+    // array of chars a-z mapping ciphered to real letters
+    val letters = new Array[Char]('Z'-'A' + 1)
+    val ciphered = List("aozejp mysljylc kd kxveddknmc re jsicpdrysi",
+                        "rbcpc ypc rtcsra dkh wyfrepkym veddknkmkrkcd",
+                        "de kr kd eoya kw aej tysr re ujdr lkgc jv")
+    val real = List("yeqour language is impossible to understand",
+                    "there are twenty six factorial possibilities",
+                    "so it is okay if you want to just give up")
+
+    for (i <- 0 to ciphered.length-1) {
+      for (j <- 0 to ciphered(i).length-1) {
+        if (ciphered(i).charAt(j) - 'a' >= 0) {
+          letters(ciphered(i).charAt(j) - 'a') = real(i).charAt(j)
+        }
+      }
+    }
+
+    var result:mutable.MutableList[String] = mutable.MutableList()
+    for (line <- lines) {
+      var newline:String = ""
+      for (c <- line) {
+        newline += (if(c != ' ') letters(c - 'a') else c)
+      }
+      result += newline
+    }
+
+    result
   }
 }
 /*========================================================== */
