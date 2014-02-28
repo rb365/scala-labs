@@ -1,9 +1,5 @@
 package org.scalalabs.basic.lab02
 
-import scala.collection.mutable.ListBuffer
- import sys._
-
-
 object ListManipulationExercise02 {
 
   /**
@@ -11,7 +7,7 @@ object ListManipulationExercise02 {
    * As usual, various ways exist: pattern matching, folding, ...
    */
   def maxElementInList(l: List[Int]): Int = {
-    error("fix me")
+    l.foldRight(l.head)((l,r) => Math.max(l, r))
   }
 
   /**
@@ -19,7 +15,14 @@ object ListManipulationExercise02 {
    * of the two list
    */
   def sumOfTwo(l1: List[Int], l2: List[Int]): List[Int] = {
-    error("fix me")
+    var res:List[Int] = List()
+    for (i <- 0 to Math.max(l1.length, l2.length)-1) {
+      val a = if (l1.length <= i) 0 else l1(i)
+      val b = if (l2.length <= i) 0 else l2(i)
+      res = res ::: List(a + b)
+    }
+
+    res
   }
 
   /**
@@ -27,7 +30,7 @@ object ListManipulationExercise02 {
    * method above
    */
   def sumOfMany(l: List[Int]*): List[Int] = {
-    error("fix me")
+    l.foldLeft(List[Int]())((l,r) => sumOfTwo(l, r))
   }
 
   case class Person(age: Int, firstName: String, lastName: String)
@@ -39,29 +42,9 @@ object ListManipulationExercise02 {
    * in a one-liner.
    */
   def separateTheMenFromTheBoys(persons: List[Person]): List[List[String]] = {
-    var boys: ListBuffer[Person] = new ListBuffer[Person]()
-    var men: ListBuffer[Person] = new ListBuffer[Person]()
-    var validBoyNames: ListBuffer[String] = new ListBuffer[String]()
-    var validMenNames: ListBuffer[String] = new ListBuffer[String]()
-
-    for (person <- persons) {
-        if (person.age < 18) {
-          boys += person
-        } else {
-          men += person
-        }
-    }
-
-    var sortedBoys = boys.toList.sortBy(_.age)
-    var sortedMen = men.toList.sortBy(_.age)
-
-    for (boy <- sortedBoys) {
-      validBoyNames += boy.firstName
-    }
-    for (man <- sortedMen) {
-      validMenNames += man.firstName
-    }
-    List(validBoyNames.toList, validMenNames.toList)
+    val boys = persons.sortBy(_.age).foldLeft(List[String]())((l,r) => if(r.age < 18) l ::: List(r.firstName) else l)
+    val men = persons.sortBy(_.age).foldLeft(List[String]())((l,r) => if(r.age >= 18) l ::: List(r.firstName) else l)
+    List(boys, men)
   }
 
 }
