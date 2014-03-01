@@ -3,8 +3,8 @@ package org.scalalabs.basic.lab02
  * This Lab contains exercises where the usage of
  * higher order collection methods can be rehearsed.
  */
-import sys._
 import collection.mutable
+import collection.mutable.ListBuffer
 
 object CollectionExercise01 {
 
@@ -77,7 +77,9 @@ object CollectionExercise02 {
    * using a functional approach.
    */
   def groupAdultsPerAgeGroup(persons: Seq[Person]): Map[Int, Seq[Person]] = {
-    error("fix me")
+    var adult = persons.foldLeft(ListBuffer[Person]())((l,r) => if(r.age >= 18) l += r else l)
+    adult = adult.sortBy(_.name)
+    adult.foldLeft(Map[Int, ListBuffer[Person]]())((l,r) => (l + ((r.age/10*10) -> (l.get(r.age / 10 * 10).getOrElse(ListBuffer[Person]()) += r))))
   }
 }
 
@@ -92,7 +94,7 @@ object CollectionExercise03 {
    * checkValuesIncrease(Seq(1,2,2)) == false
    */
   def checkValuesIncrease[T <% Ordered[T]](seq: Seq[T]): Boolean =
-     error("fix me")
+     seq.foldLeft(List(Nil, true))((l,r) => List(r, if (l(0) == Nil) true else (r > l(0).asInstanceOf[T])))(1).asInstanceOf[Boolean]
 
 }
 /*========================================================== */
@@ -103,7 +105,9 @@ object CollectionExercise04 {
    * To keep it simple it's ok to use String.split to extract all words of a sentence.
    */
   def calcLengthLongestWord(lines: String*): Int = {
-    error("fix me")
+    var maxLen = 0
+    lines.foreach(line => maxLen = line.split(" +").foldLeft(maxLen)((l,r)=>(if (l > r.length) l else r.length)))
+    maxLen
   }
 }
 
