@@ -34,7 +34,9 @@ object FunctionsExercise01 {
 object FunctionsExercise02 {
 
   def plusOne(x: Int): Int = {
-    x + 1
+    // partially applied function
+    val addOne = plus(_: Int, 1)
+    addOne(x)
   }
 
   def plus(x: Int, y: Int): Int = {
