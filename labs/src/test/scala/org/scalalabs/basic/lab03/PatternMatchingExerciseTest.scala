@@ -47,6 +47,7 @@ class PatternMatchingExerciseTest extends Specification {
 
       pf3.isDefinedAt("scala-labs") must beTrue
       pf3.isDefinedAt("other stuff") must beTrue
+      pf3.isDefinedAt("other stuf3f") must beFalse
     }
   }
 }
