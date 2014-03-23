@@ -48,13 +48,21 @@ object SimpleLogger {
   def apply(clazz: String) = new SimpleLogger(clazz)
 }
 
-class DummyService  {
+trait Loggable {
+  var logger = SimpleLogger(getClass().getName)
+
+  def debug(msg: => Any) = logger.debug(msg)
+
+  def info(msg: => Any) = logger.info(msg)
+}
+
+class DummyService extends Loggable {
   
   /**the logger must be removed. 
    * Move it to a Loggable trait that can be mix-in in any class that needs logging.
    * Finally, mix-in the Loggable trait in this class in order to log the statments
    * in the sendSomething method*/
-  val logger = SimpleLogger(getClass().getName())
+  //val logger = SimpleLogger(getClass().getName())
   
   def sendSomething(msg: Any) = {
     logger.debug("Prepare sending")
