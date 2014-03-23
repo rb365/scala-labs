@@ -29,7 +29,7 @@ object ImplictConversionExercise01 {
     //built in: our String will be converted to Scala's RichString, because this is defined a Scala
     //object called Predef. This is imported by the compiler by default.
     //
-    List[Char]()
+    s.toList
   }
 
 }
@@ -64,13 +64,27 @@ object ImplictConversionExercise02 {
       degreeCelsius * 1.8 + 32
     }
   }
+
+  implicit def fahrenheitToCelsius(f: Fahrenheit): Celsius = {
+    new Celsius(ConversionHelper.fahrenheit2CelsiusConversion(f.fahrenheit))
+  }
+
+  implicit def celsiusToFahrenheit(c: Celsius): Fahrenheit = {
+    new Fahrenheit(ConversionHelper.celsius2FahrenheitConversion(c.degree))
+  }
 }
 
 /**============================================================================ */
 // Write here an implict class that adds a camelCase method to string.
 
 object ImplictConversionExercise03 {
-
+  implicit class MyString(s : String) {
+    def camelCase : String = {
+      var result = s.split(" ").map(_.capitalize)
+      result(0) = result(0).toLowerCase()
+      result.mkString("")
+    }
+  }
 }
 
 /**============================================================================ */
@@ -80,15 +94,18 @@ object ImplictConversionExercise04 {
     case class DurationBuilder(timeSpan: Long) {
       def now = new DateTime().getMillis()
 
-      //    def seconds = TODO your implementation here...
+      def seconds = RichDuration(TimeUtils.seconds(timeSpan))
 
-      //    def minutes = TODO your implementation here...
+      def minutes = RichDuration(TimeUtils.minutes(timeSpan))
 
-      //    def hours = TODO your implementation here...
+      def hours = RichDuration(TimeUtils.hours(timeSpan))
 
-      //    def days = TODO your implementation here...
+      def days = RichDuration(TimeUtils.days(timeSpan))
     }
 
+    implicit def longToDuration(l : Long) : Duration = new Duration(l)
+    implicit def longToDurationBuilder(l : Long) : DurationBuilder = new DurationBuilder(l)
+    implicit def intToDurationBuilder(i : Int) : DurationBuilder = new DurationBuilder(i)
     //TODO define some implicits that convert integers and longs to durations and builders to make it all work
 
     def seconds(in: Long) = in * 1000L
@@ -121,8 +138,18 @@ object ImplictConversionExercise04 {
  * 2 euros >45< cents
  */
 object ImplictConversionExercise05 {
-  case class Euro(val euros: Int, val cents: Int) 
-  
+  case class Euro(val euros: Int, val cents: Int)
+
+  class EuroBuilder(val amount: Int, val inCents: Int) {
+    def euros = new EuroBuilder(0, inCents + amount * 100)
+    def cents = new EuroBuilder(0, inCents + amount)
+    def apply(amount: Int) = new EuroBuilder(amount, inCents)
+  }
+
+  implicit def intToEuroBuilder(i:Int) : EuroBuilder = new EuroBuilder(i, 0)
+
+  implicit def euroBuilderToEuro(e:EuroBuilder) : Euro = Euro.fromCents(e.inCents)
+
   object Euro {
     def fromCents(cents: Int) = new Euro(cents / 100, cents % 100)
   }
