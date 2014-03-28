@@ -2,7 +2,7 @@ package org.scalalabs.advanced.lab01
 
 /**
  * Scala's actors are units of execution that process messages.
- * Messages can be send to an Actor using the ! method. They are then stored in the Actor's mailbox.
+ * Messages can be sent to an Actor using the ! method. They are then stored in the Actor's mailbox.
  * If an Actor does not have any messages in it's mailbox to process, it is suspended.
  * Messages are processed asynchronously and  Actor's process only one message at a time.
  * Because the actor's state can only be modified by sending a message, and messages are processed serially
@@ -18,7 +18,15 @@ class EchoActor extends Actor {
   /**
    * implement the act method so that it replies any message back to the sender
    */
-  def act = exit //TODO
+  def act {
+    while (true) {
+      receive {
+        case msg => {
+          sender ! "Got message: "+msg
+        }
+      }
+    }
+  }
 }
 
 sealed trait CountEvent
@@ -36,7 +44,19 @@ class Counter extends Actor {
    * <li> replies the current value of the counter back tot the sender.
    * </ul>
    */
-  def act = exit //TODO
+  def act {
+    while (true) {
+      receive {
+        case Inc =>
+          value += 1
+          sender!value
+        case Dec =>
+          value -= 1
+          sender!value
+        case _ => sender!value
+      }
+    }
+  }
 }
 
 /**
@@ -70,10 +90,17 @@ class SimpleChatClient extends Actor {
   private var messages: List[String] = Nil
 
   /**
-   * Implement the act method so that it stores any message in a private list when it receives the AnonymousMessage class.
+   * Implement the act method so that it stores any message in a private list when it receives the Message class.
    * The client should send back all messages it currently has when it receives a ChatLog message.
    */
-  def act = exit //TODO
+  def act {
+    while (true) {
+      receive {
+        case msg:AnonymousMessage => messages ::= msg.msg
+        case ChatLog => sender!Messages(messages)
+      }
+    }
+  }
 }
 
 /**
@@ -90,7 +117,11 @@ trait ChatServer extends Actor {
    * The chatserver is repsonsible for two things: message management and chat management.
    *
    */
-  def act = exit //TODO
+  def act = loop {
+    receive {
+      chatMgt orElse messageMgt
+    }
+  }
 }
 
 
@@ -105,7 +136,7 @@ trait ChatClientOps extends Actor {
    */
   def post(message: String) = {
     println("Client " + name + " posts message " + message + " to server")
-    //TODO
+    server ! Message(name, name + ": " +message)
   }
 
   /**
@@ -118,14 +149,22 @@ trait ChatClientOps extends Actor {
 
   def login: Unit = {
     this.start
-    //TODO add this client to the chatServer
+    server ! Add(this)
   }
 
   /**
    * In the act method the client should add any AnonymousMessage it receives to its private chatLog
-   * When it recieves a ChatLog message, it should reply its chatLog to the sender, wraped inside a Messages class. 
+   * When it receives a ChatLog message, it should reply its chatLog to the sender, wrapped inside a Messages class.
    */
-  def act = exit //TODO
+  def act {
+    while (true) {
+      receive {
+        case Message(user, msg) => chatLog ::= msg
+        case BroadcastMessage(from, msg) => chatLog ::= msg
+        case ChatLog => sender ! Messages(chatLog)
+      }
+    }
+  }
 
 }
 
@@ -151,8 +190,10 @@ trait MessageMgt {
    * </ul>
    */
   protected def messageMgt: PartialFunction[Any, Unit] = {
-    //TODO implement
-    case _ =>
+    case Message(from, msg) => messages ::= msg; sessions.get(from).orNull ! Message(from, msg)
+    case AnonymousMessage(msg) => messages ::= msg
+    case BroadcastMessage(from, msg) => sessions.foreach(_._2!BroadcastMessage(from,msg))
+    case ChatLog => sender!Messages(messages)
 
   }
 }
@@ -175,9 +216,8 @@ trait ChatMgt {
    * </ul>
    */
   protected def chatMgt: PartialFunction[Any, Unit] = {
-    //TODO implement
-    case _ =>
-
+    case Add(user) => sessions.put(user.name, user)
+    case Remove(user) => sessions.remove(user)
   }
 
   protected def shutdown: Unit = {

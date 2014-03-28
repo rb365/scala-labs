@@ -41,8 +41,8 @@ class ActorExerciseTest extends JUnitSuite {
       val chatClient = new SimpleChatClient
       chatClient.start
 
-     chatClient ! Message("testuser", "message1")
-     chatClient ! Message("testuser", "message2")
+     chatClient ! AnonymousMessage("message1")
+     chatClient ! AnonymousMessage("message2")
 
      val msg: Option[List[String]] = chatClient !? (20, ChatLog) match {
        case Some(Messages(msg)) => Some(msg)
@@ -105,7 +105,7 @@ class ActorExerciseTest extends JUnitSuite {
     Thread.sleep(500)
 
     val msg3: Option[List[String]] = client2 !? ChatLog match {
-      case Some(Messages(msg)) => Some(msg)
+      case Messages(msg) => Some(msg)
       case _ => None
     }
 
